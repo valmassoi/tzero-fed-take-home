@@ -1,4 +1,5 @@
 # tzero-fed-take-home
+This is to be completed without consulting others. You may use reference documentation.  
 
 ## Install
 You need `node.js` and `yarn` installed globally  
