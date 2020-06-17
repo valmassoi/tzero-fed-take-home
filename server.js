@@ -1,9 +1,15 @@
 const express = require('express')
 const bodyParser = require('body-parser');
+const cors = require('cors')
+
 const app = express()
-app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cors())
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 
 const PORT = 3001
+const responseDelay = 1500;
 
 // [price]: quantity
 const buys = {
@@ -14,13 +20,16 @@ const sells = {
 app.get('/', (req, res) => res.send('Hello World!'))
 
 app.get('/book', (req, res) => {
-  res.json({ buys, sells })
+  // simulate delay
+  setTimeout(() => {
+    return res.json({ buys, sells })
+  }, responseDelay)
 })
 
 app.post('/buy', (req, res) => {
   const { price: p, quantity: q } = req.body;
   if (!p || !q) {
-    res.sendStatus(400)
+    return res.status(400).send('Missing param(s)')
   }
   const price = Number(p)
   let quantity = Number(q)
@@ -39,16 +48,19 @@ app.post('/buy', (req, res) => {
       loopPrice = sellPrices[i];
     }
   }
-
+  
   const prevBuysAtPrice = buys[price] || 0
   buys[price] = prevBuysAtPrice + quantity;
-  res.send('Buy order placed.')
+  // simulate delay
+  setTimeout(() => {
+    return res.status(200).send('Buy order placed.')
+  }, responseDelay)
 })
 
 app.post('/sell', (req, res) => {
   const { price: p, quantity: q } = req.body;
   if (!p || !q) {
-    res.sendStatus(400)
+    return res.status(400).send('Missing param(s)')
   }
   const price = Number(p)
   let quantity = Number(q)
@@ -67,10 +79,14 @@ app.post('/sell', (req, res) => {
       loopPrice = buyPrices[i];
     }
   }
-
+  
   const prevSellsAtPrice = sells[price] || 0
   sells[price] = prevSellsAtPrice + quantity;
-  res.send('Sell order placed.')
+  // simulate delay
+  setTimeout(() => {
+    return res.status(200).send('Sell order placed.')
+  }, responseDelay)
 })
+app.get('*', (req, res) => res.sendStatus(404))
 
 app.listen(PORT, () => console.log(`App listening at http://localhost:${PORT}`))
