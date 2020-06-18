@@ -26,11 +26,7 @@ app.get('/book', (req, res) => {
   }, responseDelay)
 })
 
-app.post('/buy', (req, res) => {
-  const { price: p, quantity: q } = req.body;
-  if (!p || !q) {
-    return res.status(400).send('Missing param(s)')
-  }
+const placeBuyOrder = (p, q) => {
   const price = Number(p)
   let quantity = Number(q)
   // match with sells
@@ -48,20 +44,12 @@ app.post('/buy', (req, res) => {
       loopPrice = sellPrices[i];
     }
   }
-  
+
   const prevBuysAtPrice = buys[price] || 0
   buys[price] = prevBuysAtPrice + quantity;
-  // simulate delay
-  setTimeout(() => {
-    return res.status(200).send('Buy order placed.')
-  }, responseDelay)
-})
+}
 
-app.post('/sell', (req, res) => {
-  const { price: p, quantity: q } = req.body;
-  if (!p || !q) {
-    return res.status(400).send('Missing param(s)')
-  }
+const placeSellOrder = (p, q) => {
   const price = Number(p)
   let quantity = Number(q)
   // match with buys
@@ -79,9 +67,31 @@ app.post('/sell', (req, res) => {
       loopPrice = buyPrices[i];
     }
   }
-  
+
   const prevSellsAtPrice = sells[price] || 0
   sells[price] = prevSellsAtPrice + quantity;
+}
+
+app.post('/buy', (req, res) => {
+  const { price, quantity } = req.body;
+  if (!price || !quantity) {
+    return res.status(400).send('Missing param(s)')
+  }
+  placeBuyOrder(price, quantity)
+
+  // simulate delay
+  setTimeout(() => {
+    return res.status(200).send('Buy order placed.')
+  }, responseDelay)
+})
+
+app.post('/sell', (req, res) => {
+  const { price, quantity } = req.body;
+  if (!price || !quantity) {
+    return res.status(400).send('Missing param(s)')
+  }
+  placeSellOrder(price, quantity)
+
   // simulate delay
   setTimeout(() => {
     return res.status(200).send('Sell order placed.')
@@ -90,3 +100,11 @@ app.post('/sell', (req, res) => {
 app.get('*', (req, res) => res.sendStatus(404))
 
 app.listen(PORT, () => console.log(`App listening at http://localhost:${PORT}`))
+
+// for testing
+module.exports = {
+  placeBuyOrder,
+  placeSellOrder,
+  buys,
+  sells,
+}
